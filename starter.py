@@ -10,7 +10,7 @@ def solve(dataset_txt):
     dataset = json.loads(dataset_txt)
 
     # Choix de la station de charge : on prend l'intersection 0 par défaut. Il y a peut-être mieux à faire !
-    base_id = 0
+    base_id = random.randint(0, 6)
 
     # On crée le graphe du réseau avec networkx. On aurait pu le faire aussi avec un simple dictionnaire Python
     # networkx permet cependant d'avoir accès à certaines fonctions comme le calcul des distances plutôt que de les recoder
@@ -97,19 +97,32 @@ print(f'Solving {dataset_file}')
 solution = solve(dataset)
 print('---------------------------------')
 score, is_valid, message = test_solution.getSolutionScore(solution, dataset)
+nb_test = 0
+
+best_score = score
+best_solution = solution
+while (nb_test < 100000):
+    solution = solve(dataset)
+    score, is_valid, message = test_solution.getSolutionScore(solution, dataset)
+    nb_test += 1
+    if best_score < score:
+        best_score = score
+        best_solution = solution
+
 
 if is_valid:
     print('✅ Solution is valid!')
     print(f'Message: {message}')
-    print(f'Score: {score:_}')
+    print(f'Score: {best_score:_}')
+    print(f'Nombre de test effectué : {nb_test}')
     
     save = input('Save solution? (y/n): ')
     if save.lower() == 'y':
         date = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-        file_name = f'{dataset_file}_{score}_{date}'
+        file_name = f'{dataset_file}_{best_score}_{date}'
         
         with open(f'.\\solutions\\{file_name}.json', 'w') as f:
-            f.write(solution)
+            f.write(best_solution)
         print('Solution saved')
     else:
         print('Solution not saved')
